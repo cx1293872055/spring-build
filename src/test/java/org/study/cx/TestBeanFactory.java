@@ -1,20 +1,26 @@
 package org.study.cx;
 
+import org.junit.jupiter.api.Test;
 import org.study.cx.factory.config.BeanDefinition;
 import org.study.cx.factory.support.DefaultListableBeanFactory;
 
 /**
- * @author ${USER}
- * @since ${YEAR}-${MONTH}-${DAY} ${DAY_NAME_FULL} ${HOUR}:${MINUTE}:${SECOND}
+ * @author chenxin
+ * @date 2023-02-09 星期四 00:13:50
  */
-public class Main {
-    public static void main(String[] args) {
 
+
+public class TestBeanFactory {
+
+    @Test
+    void testInstantiationStrategy() {
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
         beanFactory.registerBeanDefinition("userService", new BeanDefinition(UserService.class));
 
-        UserService userService = (UserService) beanFactory.getBean("userService");
+        UserService userService = (UserService) beanFactory.getBean("userService", "chenxin");
+
+
         System.out.println(userService.getUser());
         System.out.println(userService);
 

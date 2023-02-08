@@ -6,6 +6,11 @@ package org.study.cx;
  */
 
 public class UserService {
+
+    public UserService(String user) {
+        System.out.println(user);
+    }
+
     public String getUser() {
         return "chenxin-cx";
     }
