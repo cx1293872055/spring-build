@@ -7,11 +7,20 @@ package org.study.cx;
 
 public class UserService {
 
-    public UserService(String user) {
-        System.out.println(user);
+    private String uId;
+    private UserDao userDao;
+
+    public UserService() {
     }
 
+    public UserService(String name) {
+        System.out.println(name);
+    }
     public String getUser() {
         return "chenxin-cx";
+    }
+
+    public void queryUser() {
+        System.out.println("------ ** "+userDao.queryName(uId));
     }
 }

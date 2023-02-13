@@ -1,7 +1,11 @@
 package org.study.cx.factory.support;
 
+import cn.hutool.core.bean.BeanUtil;
 import org.study.cx.BeansException;
+import org.study.cx.PropertyValue;
+import org.study.cx.PropertyValues;
 import org.study.cx.factory.config.BeanDefinition;
+import org.study.cx.factory.config.BeanReference;
 
 import java.lang.reflect.Constructor;
 import java.util.Objects;
@@ -23,8 +27,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         try {
             bean = beanDefinition.getBeanClass()
                                  .newInstance();
+
+            applyPropertyValues(beanName, bean, beanDefinition);
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new BeansException("Instantiation of bean failde : ", e);
+            throw new BeansException("Instantiation of bean failed e: ", e);
         }
 
         registerSingleton(beanName, bean);
@@ -38,12 +44,36 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         Object bean = null;
         try {
             bean = createBeanInstance(beanDefinition, beanName, args);
+            applyPropertyValues(beanName, bean, beanDefinition);
         }catch (Exception e) {
             throw new BeansException("Instantiation of bean failed ", e);
         }
 
         registerSingleton(beanName, bean);
         return bean;
+    }
+
+    private void applyPropertyValues(String beanName,
+                                     Object bean,
+                                     BeanDefinition beanDefinition) {
+        try {
+            PropertyValues propertyValues = beanDefinition.getPropertyValues();
+            for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
+
+                String name = propertyValue.getName();
+                Object value = propertyValue.getValue();
+
+                if (value instanceof BeanReference) {
+                    BeanReference beanReference = (BeanReference) value;
+                    value = getBean(beanReference.getBeanName());
+                }
+
+                BeanUtil.setFieldValue(bean, name, value);
+
+            }
+        }catch (Exception e) {
+            throw new BeansException("Error setting property values:" + beanName);
+        }
     }
 
     protected Object createBeanInstance(BeanDefinition beanDefinition,
@@ -60,6 +90,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                 break;
             }
         }
-        return instantiationStrategy.instantiate(beanDefinition, beanName, constructorToUser, args);
+        return getInstantiationStrategy().instantiate(beanDefinition, beanName, constructorToUser, args);
+    }
+
+
+    public InstantiationStrategy getInstantiationStrategy() {
+        return this.instantiationStrategy;
+    }
+
+    public void setInstantiationStrategy(InstantiationStrategy instantiationStrategy) {
+        this.instantiationStrategy = instantiationStrategy;
     }
 }
